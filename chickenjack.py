@@ -19,3 +19,19 @@
 # out and their score is recorded. They try to get a high score as close
 # to 21 as possible, but if they go over, their record is destroyed
 # and they have to start over.
+
+# Create Player class
+class Player:
+    number_of_players = 0
+
+    def __init__(self, score=0):
+        Player.number_of_players += 1
+        self.player_id = Player.number_of_players
+        self.score = score
+
+greeting = "Hello! Welcome to Chickenjack!\n"
+description = """This is a mixture of a game of Chicken and Blackjack.\n
+The general rules of the game are as follows:\n
+""" # description in progress
+print(greeting)
+print(description)
