@@ -1,53 +1,47 @@
 # DESCRIPTION OF PROJECT
-# ------------------------------------------------------------------------
+# -------------------------------------------------------------------
 # CHICKENJACK
 # Mixture of a game of Chicken and Blackjack
-# 2-player or 1-player (possibly customizable number of players?)
-# ------------------------------------------------------------------------
+# As many players as you want!
+# -------------------------------------------------------------------
 # General info: start at 0, try to get as close to 21 as possible 
 # without crossing over to 22 (or higher number)
-# ------------------------------------------------------------------------
-# 2-player/multiplayer mode: each player takes turns making a choice--do 
+# -------------------------------------------------------------------
+# Multiplayer mode: each player takes turns making a choice--do 
 # they take an increment or do they chicken out?
-# If they chicken out, the other player has to take increments until
-# they get a higher number than the chicken.
-# If this other player's total is less than or equal to 21, they win!
-# If they go over, though, they lose and the chicken wins!
-# ------------------------------------------------------------------------
-# 1-player/singleplayer mode: ehhh maybe I shouldn't have a singleplayer
-# mode. If there is one, the player takes increments until they chicken
-# out and their score is recorded. They try to get a high score as close
-# to 21 as possible, but if they go over, their record is destroyed
-# and they have to start over.
+# If they chicken out, the other players should take increments until
+# they get a higher number than the chicken(s).
+# If a player's total is less than or equal to 21, they can win if they
+# end up with the highest score!
+# If they go over, though, they lose and the players with scores of
+# 21 or less win!
+# Note: ties are possible!
 
 import random # Import random() for increment() function in Player
 
-# ChickenJack and Player classes
-class ChickenJack:
-    def __init__(self):
-        self.number_of_players = 0
+# Player class
+class Player():
+    number_of_players = 0
 
+    def __init__(self): # Constructor
+        Player.number_of_players += 1
+        self.id = Player.number_of_players
+        self.score = 0
+        self.in_game = True
 
-class Player(ChickenJack):
-    single_player_mode = False
-    in_game = True
-
-    def __init__(self, score=0):
-        ChickenJack.number_of_players += 1
-        self.player_id = ChickenJack.number_of_players
-        self.score = score
-
-    def increment(self):
-        self.score += int(random() * 10)
+    def increment(self): # Increments Player's score and prints the result
+        incremented_number = random.randint(1, 10) 
+        print("Incrementing score by " + str(incremented_number) + ":\n")
+        self.score += incremented_number
+        print("Your new score is " + str(self.score) + ".\n")
         if (self.score > 21):
             self.lost_game()
 
     def lost_game(self):
         self.in_game = False
-        print("Oh no! Player " + str(self.player_id) + 
+        print("Oh no! Player " + str(self.id) + 
         " has a score of " + str(self.score) + ". They are out!\n")
-        if (number_of_players == 1):
-            print("You lost!\n")
+        Player.number_of_players -= 1 # Still need to check highest score
 
 
 greeting = "Hello! Welcome to Chickenjack!\n"
@@ -84,8 +78,51 @@ print("\nMode selection: " + mode_selection + "\n")
 
 # Set number of players
 if (mode_selection == "Multiplayer"):
-    number_of_players = int(input("How many players?\n"))
-else: number_of_players = 1
-print("\nPlayer(s): " + str(number_of_players) + "\n")
+    number_of_players_selected = int(input("How many players?\n"))
+else: number_of_players_selected = 1
+print("\nPlayer(s): " + str(number_of_players_selected) + "\n")
 
-# Initialize ChickenJack and Player objects
+# Initialize Player object(s)
+players = []
+for i in range(1, number_of_players_selected+1):
+    players.append(Player())
+
+# Ask to increment scores until everyone has exited the game
+valid_player_increment_selection = False
+while (Player.number_of_players != 0):
+    for player in players:
+        if (player.in_game == False):
+            continue
+        else:
+            player_increment_selection_prompt = "Player " + str(player.id) + ", your current score is " + str(player.score) + ". Would you like to increment your score? Y/N\n"
+            while (valid_player_increment_selection == False):
+                player_increment_selection = input(player_increment_selection_prompt).lower()
+                if ((player_increment_selection != "y") and 
+                (player_increment_selection != "yes") and 
+                (player_increment_selection != "n") and
+                (player_increment_selection != "no")):
+                    print(invalid_selection)
+                else: valid_player_increment_selection = True
+            if ((player_increment_selection == "y") or 
+            (player_increment_selection == "yes")):
+                player.increment()
+                valid_player_increment_selection = False
+            else: 
+                player.in_game = False
+                Player.number_of_players -= 1
+                valid_player_increment_selection = False
+
+# Compare scores to see who (if anyone) wins!
+highest_score = -1
+highest_score_player_ids = []
+for player in players:
+    if ((player.score > highest_score) and (player.score <= 21)):
+        highest_score = player.score
+        highest_score_player_ids.clear()
+        highest_score_player_ids.append(player.id)
+    elif (player.score == highest_score):
+        highest_score_player_ids.append(player.id)
+if (highest_score == -1):
+    print("\nLooks like nobody won this time...")
+else: print("\nWow! Player(s) " + str(highest_score_player_ids) + " won with a score of " + str(highest_score) + ". Nice job!\n")
+# That's all, folks!
